@@ -1,5 +1,7 @@
 {
   "name": "toe-pos",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "angular"
 }

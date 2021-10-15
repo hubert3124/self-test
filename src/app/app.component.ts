@@ -1,5 +1,8 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Platform } from '@ionic/angular';
+import { SplashScreen } from '@capacitor/splash-screen';
+
 import { environment } from '../environments/environment';
 
 @Component({
@@ -7,7 +10,7 @@ import { environment } from '../environments/environment';
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
 })
-export class AppComponent implements OnInit, AfterViewInit {
+export class AppComponent implements OnInit {
   @ViewChild('Iframe') public iframeRef: ElementRef<HTMLIFrameElement>;
   public url: SafeResourceUrl;
 
@@ -15,9 +18,20 @@ export class AppComponent implements OnInit, AfterViewInit {
   private messagePort1: MessagePort;
 
   constructor(
-    private sanitizer: DomSanitizer
+    private platform: Platform,
+    private sanitizer: DomSanitizer,
   ) {
     this.url = this.sanitizer.bypassSecurityTrustResourceUrl(environment.posUrl);
+    this.initializeApp();
+  }
+
+  async initializeApp() {
+    await this.platform.ready();
+    SplashScreen.show({
+      autoHide: false
+    }).then(() => {
+      console.log('# splashScreen.show');
+    });
   }
 
   ngOnInit() {
@@ -30,21 +44,27 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.messagePort1.onmessage = (e: MessageEvent) => {
       this.onMessageReceive(e);
     };
-  }
 
-  ngAfterViewInit() {
-    this.setChannel();
+    setTimeout(() => {
+      this.setChannel();
+    }, 3000);
   }
 
   /** 생성한 port2를 iframe으로 전달한다. */
   private setChannel() {
-    console.log('%c [Init channel]', 'background: #222; color: #bada55');
+    console.log('%c[toe-pos] set channel', 'background: #222; color: #bada55');
     this.iframeRef.nativeElement.contentWindow.postMessage('init', '*', [this.messageChannel.port2]);
   }
 
   /** 수신 메시지를 처리한다. */
   private onMessageReceive(e: MessageEvent) {
-    console.log(e.data);
+    console.log('receive message:', e.data);
+    const data: { api: string; action: string } = e.data;
+    if (data) {
+      if (data.api === 'SplashScreen' && data.action === 'hide') {
+        SplashScreen.hide().then(() => console.log('< SplashScreen.hide'));
+      }
+    }
   }
 
   /** MessageEvent 연결을 해제한다. */
