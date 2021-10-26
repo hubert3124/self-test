@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   // posUrl: 'https://dev.ceo.toe.cloud'
-  posUrl: 'http://localhost:4202'
+  posUrl: 'http://192.168.200.187:4202'
 };
 
 /*

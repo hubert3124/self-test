@@ -4,13 +4,19 @@
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
   "scripts": {
-    "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
     "lint": "ng lint",
+    "build": "ng build",
+    "ios-prepare": "ionic capacitor add ios",
+    "ios-res": "cordova-res ios --skip-config --copy",
+    "ios-open": "ionic capacitor open ios",
+    "ios-external": "ionic capacitor run ios -l --external",
+    "build-ios": "ionic capacitor build ios && npm run ios-res",
+    "android-res": "cordova-res android --skip-config --copy",
+    "create-res": "npm run ios-res && npm run android-res",
+    "ng": "ng",
     "e2e": "ng e2e",
-    "run-ios": "ionic capacitor copy ios"
+    "test": "ng test"
   },
   "private": true,
   "dependencies": {

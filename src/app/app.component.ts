@@ -26,12 +26,9 @@ export class AppComponent implements OnInit {
   }
 
   async initializeApp() {
+    await SplashScreen.show({ autoHide: false });
     await this.platform.ready();
-    SplashScreen.show({
-      autoHide: false
-    }).then(() => {
-      console.log('# splashScreen.show');
-    });
+    SplashScreen.hide();
   }
 
   ngOnInit() {
@@ -59,12 +56,22 @@ export class AppComponent implements OnInit {
   /** 수신 메시지를 처리한다. */
   private onMessageReceive(e: MessageEvent) {
     console.log('receive message:', e.data);
-    const data: { api: string; action: string } = e.data;
+    const data: { action: string } = e.data;
     if (data) {
-      if (data.api === 'SplashScreen' && data.action === 'hide') {
-        SplashScreen.hide().then(() => console.log('< SplashScreen.hide'));
+    //   if (data.action === 'splashScreenHide') {
+    //     SplashScreen.hide().then(() => console.log('< SplashScreen.hide'));
+    //   }
+      if (data.action === 'toeAppCeoReady') {
+        this.postMessage({
+          action: 'playSound'
+        });
       }
     }
+  }
+
+  private postMessage(message: any) {
+    this.messagePort1.postMessage(message);
+    console.log('post message:', message);
   }
 
   /** MessageEvent 연결을 해제한다. */

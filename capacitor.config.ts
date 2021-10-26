@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'toe.pos',
   appName: 'toe-pos',
   webDir: 'www',
   bundledWebRuntime: false
