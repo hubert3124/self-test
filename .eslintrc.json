@@ -14,12 +14,6 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
-        "@angular-eslint/component-class-suffix": [
-          "error",
-          {
-            "suffixes": ["Page", "Component"]
-          }
-        ],
         "@angular-eslint/component-selector": [
           "error",
           {
@@ -35,7 +29,28 @@
             "prefix": "app",
             "style": "camelCase"
           }
-        ]
+        ],
+        "@typescript-eslint/explicit-member-accessibility": [
+          "off",
+          {
+            "accessibility": "explicit"
+          }
+        ],
+        "arrow-parens": [
+          "off",
+          "always"
+        ],
+        "import/order": "off",
+        "max-len": [
+          "error",
+          {
+            "code": 160
+          }
+        ],
+        "camelcase": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "no-underscore-dangle": "off",
+        "prefer-arrow/prefer-arrow-functions": "off"
       }
     },
     {
