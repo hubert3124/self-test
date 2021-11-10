@@ -1,6 +1,6 @@
-/* eslint-disable no-bitwise */
 import { Injectable } from '@angular/core';
 import { Platform } from '@ionic/angular';
+import { encode } from 'iconv-lite';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const Socket = (window as any).Socket;
@@ -45,19 +45,15 @@ export class SocketService {
     });
   }
 
-  public async sendData(dataString: string) {
-    try {
-      // 1. open
-      await this.socketOpen('192.168.200.187', 1234);
+  public async sendData(dataString: string, host: string, port: number = 9100) {
+    // 1. open
+    await this.socketOpen(host, port);
 
-      // 2. write
-      await this.socketWrite(dataString);
+    // 2. write
+    await this.socketWrite(dataString);
 
-      // 3. close(send FIN)
-      await this.socketClose();
-    } catch (error) {
-      console.error(error);
-    }
+    // 3. close(send FIN)
+    await this.socketClose();
   }
 
   private async socketOpen(host: string, port: number): Promise<boolean> {
@@ -73,17 +69,9 @@ export class SocketService {
 
   private async socketWrite(dataString: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-      const data = new Uint8Array(dataString.length * 2);
-      for (let i = 0; i < data.length; i++) {
-        const charCode = dataString.charCodeAt(i);
-        if (charCode > 255) {
-          // Uint8Array의 가용 범위를 벗어나는 경우 담을 수 없다.
-          // 초기값(0)으로 두고 건너뛴다.
-          continue;
-        }
-      }
-
-      this.socket.write(data,
+      const euckr = encode(dataString, 'euc-kr');
+      this.socket.write(
+        euckr,
         () => resolve(true),
         (error) => reject(`socketWrite - error: ${error.message}\ncode: ${error.code}`)
       );

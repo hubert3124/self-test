@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import fecha, {setGlobalDateI18n} from 'fecha';
 import cloneDeep from 'lodash/cloneDeep'; // refer: https://medium.com/@armno/til-importing-lodash-into-angular-the-better-way-aacbeaa40473
-import { inspect } from 'util';
 
 import { EP } from '../0/escpos';
 import { ReviewChange, vendorMappingsKR } from '../1/string-map';
@@ -20,7 +19,7 @@ const maxWidth = 42; // character, 한글은 21
  *
  * @param room 주문이 아닌 conf/organization의 정보에서 가져온다.
  */
-const renderFoods = async (what: 'customer' | 'cook', orders: UnifiedOrderMerge[], room: RoomDoc, ignoreZeroOption = false) => {
+const renderFoods = (what: 'customer' | 'cook', orders: UnifiedOrderMerge[], room: RoomDoc, ignoreZeroOption = false) => {
   const mergedOrder = mergeOrders(orders, ignoreZeroOption);
 
   const start =
@@ -68,7 +67,7 @@ const renderFoods = async (what: 'customer' | 'cook', orders: UnifiedOrderMerge[
   data += numOrders;
 
   if (orders.length > 0) {
-    data += await escposFoods(what, mergedOrder);
+    data += escposFoods(what, mergedOrder);
   }
 
   const end = '\n\n' + EP.FEED_PARTIAL_CUT_N + '\x10';
@@ -244,7 +243,7 @@ const renderReview = (type: 'added' | 'modified' | 'removed', review: BaeminUser
  * printOrder =>
  * 1건의 주문을 출력한다.
  */
-const renderOrder = async (what: 'customer' | 'cook', order: UnifiedOrderMerge, room: RoomDoc, autoPrint: boolean, doublePrint: boolean): Promise<string> => {
+const renderOrder = (what: 'customer' | 'cook', order: UnifiedOrderMerge, room: RoomDoc, autoPrint: boolean, doublePrint: boolean): string => {
   const telNo = room.telNo ? normalizeTel(room.telNo) : '';
 
   const title0 = order.simpleNo ?? '';
@@ -429,7 +428,7 @@ const renderOrder = async (what: 'customer' | 'cook', order: UnifiedOrderMerge, 
     data += '          ------- 주방용 -------\n';
     data += title;
     data += orderMsg;
-    data += await escposFoods(what, order, doublePrint);
+    data += escposFoods(what, order, doublePrint);
     data += orderVendor;
     if (order.simpleNo) {
       data += simpleNo;
@@ -454,7 +453,7 @@ const renderOrder = async (what: 'customer' | 'cook', order: UnifiedOrderMerge, 
     }
     data += orderMsg;
 
-    data += await escposFoods(what, order);
+    data += escposFoods(what, order);
 
     data += shopName;
     data += orderVendor;
@@ -480,7 +479,7 @@ const renderOrder = async (what: 'customer' | 'cook', order: UnifiedOrderMerge, 
  * printMessage =>
  * 메시지를 출력한다.
  */
-const renderMessage = async (
+const renderMessage = (
   textTitle: string,
   textRaw: string,
   beep: boolean,
@@ -488,7 +487,7 @@ const renderMessage = async (
   order: UnifiedOrderMerge | undefined,
   telNo?: string,
   originDesc?: string
-): Promise<string> => {
+): string => {
   let start = EP.INIT;
   start += beep ? '\x07\x07\x07\x07\x07\x07' : '';
   start += autoPrint ? '             << 자동  인쇄 >>' : '';
@@ -503,7 +502,7 @@ const renderMessage = async (
   data += EP.INIT; // textRaw 에 escpos 코드를 허용하기 때문에 초기화한다.
   if (order !== undefined) {
     data += '---------------- 관련주문 ----------------\n\n';
-    data += await renderOrderForMessage(order, telNo, originDesc);
+    data += renderOrderForMessage(order, telNo, originDesc);
   }
   const printTime = fecha.format(new Date(), 'YYYY-MM-DD HH:mm:ss');
   const end = `\n\n\n출력일시: ${printTime}` + '\n' + EP.FEED_PARTIAL_CUT_N + '\x10';
@@ -548,7 +547,7 @@ const appendOrder = (order1: Partial<UnifiedOrderMerge>, order2: UnifiedOrderMer
       food.foodOpts = food.foodOpts.filter((foodOpt) => foodOpt.optPrice > 0);
 
       if (food.foodOpts.length === 0) {
-        console.error(`0원 메뉴 등장. 어떤 경우인가? food = ${inspect(food, true, 10, true)}`);
+        console.error(`0원 메뉴 등장. 어떤 경우인가? food = ${JSON.stringify(food)}`);
       }
 
       // 2. 옵션을 food로 승격 (이름 앞에 '+ ' 추가)
@@ -766,7 +765,7 @@ const escposFoods = (what: 'cook' | 'customer', order: Partial<UnifiedOrderMerge
   return escpos;
 };
 
-const renderOrderForMessage = async (order: UnifiedOrderMerge, telNo = '', originDesc?: string) => {
+const renderOrderForMessage = (order: UnifiedOrderMerge, telNo = '', originDesc?: string) => {
   const normalizedTelNo = normalizeTel(telNo);
 
   const title0 = order.simpleNo ?? '';
@@ -948,7 +947,7 @@ const renderOrderForMessage = async (order: UnifiedOrderMerge, telNo = '', origi
   }
   data += orderMsg;
 
-  data += await escposFoods('customer', order);
+  data += escposFoods('customer', order);
 
   data += shopName;
   data += orderVendor;

@@ -15,7 +15,7 @@ export type DeepPartial<T> = {
 export function debugLog(msg: string) {
   // 디버깅용
   if (environment.production === false) {
-    console.log(msg);
+    console.log(`%c${msg}`, 'background: #555; color: #fff');
   }
 }
 

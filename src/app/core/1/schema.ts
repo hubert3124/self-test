@@ -525,3 +525,68 @@ export type BaeminUserReviewDoc = BaeminUserReview & {
   __comments?: string; // UI
   __menu?: string; // UI
 };
+
+
+/**
+ * toe-app-ceo에서 toe-pos로 보내는 메시지
+ */
+export interface CeoMessageChannelData {
+  toeAppCeoReady: boolean;
+  printOrder: {
+    data: string;
+  };
+  printStat: {
+    host: string;
+    port: number;
+    orders: UnifiedOrderDoc[];
+    room: RoomDoc;
+    ignoreZeroOption: boolean;
+  };
+}
+
+/**
+ * toe-pos에서 ceo로 보내는 메시지
+ */
+export interface PosMessageChannelData {
+  [key: string]: { [key: string]: any };
+}
+
+interface ReviewChange {
+  rating: 0 | 1.0 | 2.0 | 3.0 | 4.0 | 5.0; // 0(삭제된 경우) 5.0,
+  contents: string;
+}
+
+/**
+ * toe-app-ceo에서 toe-pos로 보내는 메시지
+ */
+export interface InAppBrowserMessage {
+  printStat: {
+    host: string;
+    orders: UnifiedOrderDoc[];
+    room: RoomDoc;
+    ignoreZeroOption: boolean;
+  };
+  printOrder: {
+    host: string;
+    whats: ('cook' | 'customer')[];
+    order: UnifiedOrderDoc;
+    room: RoomDoc;
+    beep: boolean;
+    autoPrint: boolean;
+    doublePrint: boolean;
+  };
+  printReview: {
+    host: string;
+    type: 'added' | 'modified' | 'removed';
+    review: BaeminUserReviewDoc;
+    oldReview?: ReviewChange;
+  };
+  printMessage: {
+    host: string;
+    textTitle: string;
+    textRaw: string;
+    beep: boolean;
+    autoPrint: boolean;
+    order?: UnifiedOrderMerge;
+  };
+}

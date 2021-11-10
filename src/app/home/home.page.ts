@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { SocketService } from '../core/0/socket.service';
 
 @Component({
   selector: 'app-home',
@@ -10,10 +9,5 @@ import { SocketService } from '../core/0/socket.service';
 export class HomePage {
 
   constructor(
-    private socketService: SocketService
   ) {}
-
-  public sendData(dataString: string) {
-    this.socketService.sendData(dataString);
-  }
 }
