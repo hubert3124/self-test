@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
-  // posUrl: 'https://dev.ceo.toe.cloud',
-  posUrl: 'http://192.168.200.187:4202',
+  posUrl: 'https://dev.ceo.toe.cloud',
+  // posUrl: 'http://192.168.200.187:4202',
   firebaseProd: {
     apiKey: 'AIzaSyDOwd8SczxpCH5U9R-5ikRNHS-iGgPWkgU',
     authDomain: 'toe-prod.firebaseapp.com',
