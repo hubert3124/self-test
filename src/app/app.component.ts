@@ -1,4 +1,3 @@
-import fecha from 'fecha';
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Platform } from '@ionic/angular';
@@ -9,9 +8,7 @@ import { Subscription } from 'rxjs';
 import { environment } from '../environments/environment';
 
 import { SocketService } from './core/0/socket.service';
-import { renderFoods, renderReview, renderOrder, renderMessage } from './core/4/print-order';
-import { InAppBrowserMessage } from './core/1/schema';
-import { EP } from './core/0/escpos';
+import { InAppBrowserMessage } from './core/0/schema';
 
 @Component({
   selector: 'app-root',
@@ -78,77 +75,24 @@ export class AppComponent implements AfterViewInit {
     let messageName = '';
 
     try {
-      if (event.data.printStat) {
-        messageName = 'printStat';
-        const { host, orders, room, ignoreZeroOption } = event.data.printStat as InAppBrowserMessage['printStat'];
-        const dataString = renderFoods('customer', orders, room, ignoreZeroOption);
-        await this.socketService.sendData(dataString, host);
-        this.messageCallback('success');
-      }
-
-      if (event.data.printOrder) {
-        messageName = 'printOrder';
-        const { host, whats, order, room, beep, autoPrint, doublePrint } = event.data.printOrder as InAppBrowserMessage['printOrder'];
-
-        let dataString = '';
-        const partialCut = '\n' + EP.FEED_PARTIAL_CUT_N + '\x10'; // EPSON은 행의 시작에서만 cut 이 된다.
-        for (const [index, what] of whats.entries()) {
-          dataString += renderOrder(what, order, room, autoPrint, doublePrint);
-          if (what === 'customer') {
-            const originDesc = room.originDesc;
-            if (originDesc) {
-              const line = originDesc.trim();
-              if (line.length > 0) {
-                const originPrint = '\n          ---- 원산지  표기 ----\n' + `${line}`;
-                dataString += originPrint;
-              }
-            }
-          }
-        }
-
-        // TODO: 왜 for문 안에서 처리했는지 물어보기
-        // 항상 출력물의 마지막에 시간표시를 한다.
-        const printTime = fecha.format(new Date(), 'YYYY-MM-DD HH:mm:ss');
-        dataString += `\n\n\n출력일시: ${printTime}`;
-        dataString += partialCut;
-
-        // TODO: Epson 버저가 추가되면 명령을 테스트 필요하다.
-        const beepSound = EP.INIT + '\x07\x07\x07\x07';
-        if (beep) {
-          dataString = beepSound + dataString;
-        }
-
-        await this.socketService.sendData(dataString, host);
-        this.messageCallback('success');
-      }
-
-      if (event.data.printReview) {
-        messageName = 'printReview';
-        const { host, type, review, oldReview } = event.data.printReview as InAppBrowserMessage['printReview'];
-        const dataString = renderReview(type, review, oldReview);
-        await this.socketService.sendData(dataString, host);
-        this.messageCallback('success');
-      }
-
-      if (event.data.printMessage) {
-        messageName = 'printMessage';
-        const { host, textTitle, textRaw, beep, autoPrint, order } = event.data.printMessage as InAppBrowserMessage['printMessage'];
-        const dataString = renderMessage(textTitle, textRaw, beep, autoPrint, order);
+      if (event.data.printRequest) {
+        messageName = 'printRequest';
+        const { host, dataString } = event.data.printRequest as InAppBrowserMessage['printRequest'];
         await this.socketService.sendData(dataString, host);
         this.messageCallback('success');
       }
     } catch (error) {
-      console.error(`${messageName} 처리중 에러 발생`);
-      this.messageCallback('error', `${messageName} 처리중 에러 발생. error: ${error.message}`);
+      console.error(`${messageName} 처리중 에러 발생`, error);
+      const err = JSON.stringify(error);
+      this.messageCallback('error', `${messageName} 처리중 에러 발생. Native Error: ${err}`);
     }
-
-    // toe-app-ceo에 print-agent를 넣는 식으로 변경
-    // 9100 공용
   };
 
   private messageCallback = (result: 'success' | 'error', reason?: string) => {
+    // executeScript를 통해 inAppBrowser에 있는 함수를 실행시킬 수 있다.
+    // 'inAppBrowserMessageResult()'는 toe-app-ceo에 global로 등록시켜둔 함수다.
     this.browser.executeScript({ code: `
-      inAppBrowserMessageResult('${result}')`
+      inAppBrowserMessageResult('${result}', ${reason ? `'${reason}'` : undefined})`
     });
   };
 }
